@@ -48,11 +48,10 @@ module DatabaseRewinder
         end
       end or return
 
-      match = sql.match(/\A\s*INSERT(?:\s+IGNORE)?(?:\s+INTO)?\s+(?:\.*[`"]?([^.\s`"]+)[`"]?)*/i)
-      return unless match
+      tables = sql.scan(/^\s*INSERT(?:\s+IGNORE)?(?:\s+INTO)?\s+(?:\.*[`"]?([^.\s`"]+)[`"]?)*/i)
+      return if tables.empty?
 
-      table = match[1]
-      if table
+      tables.flatten.each do |table|
         cleaner.inserted_tables << table unless cleaner.inserted_tables.include? table
         cleaner.pool ||= connection.pool
       end
